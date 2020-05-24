@@ -47,13 +47,17 @@ class UI {
   }
   //<div class="alert alert-success"></div>
   //Creating a div from scratch
-  static showAlert(message, className){
+  static showAlert(message, className) {
     const div = document.createElement('div');
-    div.className = 'alert alert-${className}';
+    div.className = `alert alert-${className}`;//bootstrap alert used here
     div.appendChild(document.createTextNode(message));
     const container = document.querySelector('.container');
     const form = document.querySelector('#book-form');
-    container.insertBefore(div,form);//we want our div before the form
+    container.insertBefore(div, form);//we want to insert before form just after div.
+
+    //Vanish alert after 3 seconds
+    setTimeout(()=> document.querySelector('.alert').remove(),3000);
+
   }
 
   static clearFields(){//clears fields on submission
@@ -82,7 +86,7 @@ document.querySelector('#book-form').addEventListener('submit',(e)=>
 
   //Validate
   if(title === '' || author === '' || isbn === ''){
-    alert('Please enter all fields!');
+    UI.showAlert('Please enter all fields!','danger');//danger: used through bootstrap gives red alert
   }
   else {
     //Instatiate book
@@ -90,6 +94,9 @@ document.querySelector('#book-form').addEventListener('submit',(e)=>
 
   //Add Book to UI
   UI.addBookToList(book);//Shows the book added in the UI
+
+  //Show success message
+  UI.showAlert('Book Added','info')
 
   //clearFields
   UI.clearFields();
@@ -101,4 +108,7 @@ document.querySelector('#book-form').addEventListener('submit',(e)=>
 document.querySelector('#book-list').addEventListener('click',(e)=>
 {
   UI.deleteBook(e.target);
+  
+  //Show success message
+  UI.showAlert('Book Removed','info')
 });
