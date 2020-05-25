@@ -19,7 +19,7 @@ Open the index.html file using your preferred browser like Chrome/Firefox/Edge.
 * [HTML5](https://html.com/)
 
 
-## Acknowledgments
+## Acknowledgements
 
 * Brad Traversy Vanilla JS Tutorials on Youtube
 
