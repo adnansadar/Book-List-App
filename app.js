@@ -1,52 +1,41 @@
-//Book class: Represents a Book
+// Book Class: Represents a Book
 class Book {
-  constructor(title,author,isbn) {
+  constructor(title, author, isbn) {
     this.title = title;
     this.author = author;
     this.isbn = isbn;
   }
 }
 
-//UI class: Handle UI Tasks
+// UI Class: Handle UI Tasks
 class UI {
-  static displayBooks(){
-    const StoredBooks = [ //Array of localStorage books
-      {
-        title: 'Book One',
-        author: 'John Doe',
-        isbn: '343434'
-      },
-      {
-        title: 'Book Two',
-        author: 'Jane Doe',
-        isbn: '343545'
-      }
-    ];
-    const books = StoredBooks;
-    books.forEach((book) => {UI.addBookToList(book)
+  static displayBooks() {
+    const books = Store.getBooks();
 
-    });
-    }
-    static addBookToList(book){
-      const list = document.querySelector('#book-list');//Using DOM grabbing the list
-      const row = document.createElement('tr');//table row element
-      row.innerHTML = `
-        <td> ${book.title}</td>
-        <td> ${book.author}</td>
-        <td> ${book.isbn}</td>
-        <td><a href = "#" class = "btn btn-danger btn-sm delete">X</a></td>
-      `;
-      //Appending Row to List
-      list.appendChild(row);
+    books.forEach((book) => UI.addBookToList(book));
   }
 
-  static deleteBook(el){
-    if(el.classList.contains('delete')){
+  static addBookToList(book) {
+    const list = document.querySelector('#book-list');//Using DOM grabbing the list
+
+    const row = document.createElement('tr');//table row element
+
+    row.innerHTML = `
+      <td>${book.title}</td>
+      <td>${book.author}</td>
+      <td>${book.isbn}</td>
+      <td><a href="#" class="btn btn-danger btn-sm delete">X</a></td>
+    `;
+//Appending Row to List
+    list.appendChild(row);
+  }
+
+  static deleteBook(el) {
+    if(el.classList.contains('delete')) {
       el.parentElement.parentElement.remove();//2 times used cause we dont want to just remove td of the button delete we want the whole row which is tr(parent of parent of delete button)
     }
   }
-  //<div class="alert alert-success"></div>
-  //Creating a div from scratch
+//Creating a div from scratch
   static showAlert(message, className) {
     const div = document.createElement('div');
     div.className = `alert alert-${className}`;//bootstrap alert used here
@@ -55,60 +44,91 @@ class UI {
     const form = document.querySelector('#book-form');
     container.insertBefore(div, form);//we want to insert before form just after div.
 
-    //Vanish alert after 3 seconds
-    setTimeout(()=> document.querySelector('.alert').remove(),3000);
-
+    // Vanish in 3 seconds
+    setTimeout(() => document.querySelector('.alert').remove(), 3000);
   }
 
-  static clearFields(){//clears fields on submission
+  static clearFields() {
     document.querySelector('#title').value = '';
     document.querySelector('#author').value = '';
     document.querySelector('#isbn').value = '';
   }
 }
 
+// Store Class: Handles Storage
+class Store {//Only strings can be stored in local storage not objects
+  static getBooks() {
+    let books;
+    if(localStorage.getItem('books') === null) {//getItem is a function of localStorage
+      books = [];
+    } else {
+      books = JSON.parse(localStorage.getItem('books'));//Have to parse the string to use it as a regular array of objects
+    }
 
-//Store Class: Handles Storage
+    return books;
+  }
 
-//Event: Display Books
+  static addBook(book) {
+    const books = Store.getBooks();
+    books.push(book);
+    localStorage.setItem('books', JSON.stringify(books));//gotta convert books object into a string. localStorage accepts only strings.
+  }
+
+  static removeBook(isbn) {
+    const books = Store.getBooks();
+
+    books.forEach((book, index) => {
+      if(book.isbn === isbn) {
+        books.splice(index, 1);//add one item at index position
+      }
+    });
+
+    localStorage.setItem('books', JSON.stringify(books));
+  }
+}
+
+// Event: Display Books
 document.addEventListener('DOMContentLoaded', UI.displayBooks);
 
-//Event: Add a book
-document.querySelector('#book-form').addEventListener('submit',(e)=>
-{
-  //Prevent actual submit
+// Event: Add a Book
+document.querySelector('#book-form').addEventListener('submit', (e) => {
+  // Prevent actual submit
   e.preventDefault();
 
-  //Get form values
+  // Get form values
   const title = document.querySelector('#title').value;
   const author = document.querySelector('#author').value;
   const isbn = document.querySelector('#isbn').value;
 
-  //Validate
-  if(title === '' || author === '' || isbn === ''){
-    UI.showAlert('Please enter all fields!','danger');//danger: used through bootstrap gives red alert
+  // Validate
+  if(title === '' || author === '' || isbn === '') {
+    UI.showAlert('Please fill in all fields', 'danger');//danger: used through bootstrap gives red alert
+  } else {
+    // Instatiate book
+    const book = new Book(title, author, isbn);
+
+    // Add Book to UI
+    UI.addBookToList(book);
+
+    // Add book to store
+    Store.addBook(book);
+
+    // Show success message
+    UI.showAlert('Book Added', 'success');
+
+    // Clear fields
+    UI.clearFields();
   }
-  else {
-    //Instatiate book
-    const book = new Book(title,author, isbn);//Gets displayed in the console
-
-  //Add Book to UI
-  UI.addBookToList(book);//Shows the book added in the UI
-
-  //Show success message
-  UI.showAlert('Book Added','info')
-
-  //clearFields
-  UI.clearFields();
-}
 });
 
-
-//Event: Remove a book
-document.querySelector('#book-list').addEventListener('click',(e)=>
-{
+// Event: Remove a Book
+document.querySelector('#book-list').addEventListener('click', (e) => {
+  // Remove book from UI
   UI.deleteBook(e.target);
-  
-  //Show success message
-  UI.showAlert('Book Removed','info')
+
+  // Remove book from store
+  Store.removeBook(e.target.parentElement.previousElementSibling.textContent);//used to get the isbn inside the td. parent =td. to get previous td we use previousElementSibling
+
+  // Show success message
+  UI.showAlert('Book Removed', 'success');
 });
