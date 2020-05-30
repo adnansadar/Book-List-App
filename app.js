@@ -114,7 +114,7 @@ document.querySelector('#book-form').addEventListener('submit', (e) => {
     Store.addBook(book);
 
     // Show success message
-    UI.showAlert('Book Added', 'success');
+    UI.showAlert('Book Added', 'info');
 
     // Clear fields
     UI.clearFields();
@@ -130,5 +130,5 @@ document.querySelector('#book-list').addEventListener('click', (e) => {
   Store.removeBook(e.target.parentElement.previousElementSibling.textContent);//used to get the isbn inside the td. parent =td. to get previous td we use previousElementSibling
 
   // Show success message
-  UI.showAlert('Book Removed', 'success');
+  UI.showAlert('Book Removed', 'info');
 });
